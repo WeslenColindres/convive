@@ -1,40 +1,56 @@
 from django.db import models
 from django.contrib.auth.models import User
-# Create your models here.
 
-class Perfil(models.Model):
-    TIPO_CHOICES = (
-        ('estudiante', 'Estudiante'),
-        ('docente', 'Docente'),
-    )
-    user = models.OneToOneField(User,unique=True, null=True, db_index=True, on_delete=models.CASCADE)
-    carnet = models.CharField(max_length=15, blank=False)
-    semestre = models.IntegerField(null=True)
-    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, default='estudiante')
-    def __str__(self):
-        return self.user.username
+class Usuario(models.Model):
+    ID_Usuario = models.AutoField(primary_key=True)
+    nombre_completo = models.CharField(max_length=200)
+    NIT = models.EmailField(max_length=100)
+    direccion = models.CharField(max_length=255)
+    ciudad = models.CharField(max_length=100)
 
-class Evento(models.Model):
-    ano = models.IntegerField(null=True)
-    estado = models.BooleanField(default=True)    
-    nombre = models.CharField(max_length=150, blank=False)
-    def __str__(self):
-        return self.nombre
+class CategoriaProducto(models.Model):
+    ID_Categoria = models.AutoField(primary_key=True)
+    Nombre_Categoria = models.CharField(max_length=100)
 
-class Actividad(models.Model):
-    evento = models.ForeignKey(Evento, on_delete=models.CASCADE,null=True)
-    nombre = models.CharField(max_length=150, blank=False)
-    fecha = models.DateField(null = True)
-    estado = models.BooleanField(default=False)
-    def __str__(self):
-        return self.nombre
+class Proveedor(models.Model):
+    ID_Proveedor = models.AutoField(primary_key=True)
+    Nombre_Proveedor = models.CharField(max_length=100)
+    Contacto = models.CharField(max_length=100)
+    Teléfono = models.CharField(max_length=15)
+    Dirección = models.CharField(max_length=255)
 
-class Asistencia(models.Model):
-    actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE,null=True)
-    docente = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    estudiante = models.ForeignKey(Perfil, on_delete=models.CASCADE,null=True)
-    codigo = models.CharField(max_length=10, null=True, unique=True)
-    def __str__(self):
-        return self.actividad.nombre
+class Producto(models.Model):
+    ID_Producto = models.AutoField(primary_key=True)
+    Nombre_Producto = models.CharField(max_length=100)
+    Descripción = models.TextField()
+    Precio_Unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    Cantidad_Stock = models.IntegerField(default=0)
+    ID_Categoria = models.ForeignKey(CategoriaProducto, on_delete=models.CASCADE)
+
+class EntradaInventario(models.Model):
+    ID_Entrada  = models.AutoField(primary_key=True)
+    ID_Proveedor  = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    ID_Producto  = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    Cantidad  = models.IntegerField()
+    Precio_Compra  = models.DecimalField(max_digits=10, decimal_places=2)
     
+
+class Venta(models.Model):
+    ID_Venta = models.AutoField(primary_key=True)
+    Fecha_Hora = models.DateTimeField(auto_now_add=True)
+    Total = models.DecimalField(max_digits=10, decimal_places=2)
+
+class VentaUsuario(models.Model):
+    ID_VentasUsuario = models.AutoField(primary_key=True)
+    ID_Venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
+    ID_Usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     
+
+class DetalleVenta(models.Model):
+    ID_Detalle = models.AutoField(primary_key=True)
+    ID_VentasUsuario = models.ForeignKey(VentaUsuario, on_delete=models.CASCADE)
+    ID_Producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    Cantidad = models.IntegerField()
+    Precio_Unitario = models.DecimalField(max_digits=10, decimal_places=2)
+
+
